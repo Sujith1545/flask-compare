@@ -9,4 +9,3 @@ install and run:
 5. python3 run.py
 6. pip3 install openpyxl
 7. pip3 install pandas
-
