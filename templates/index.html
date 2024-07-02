@@ -1,0 +1,117 @@
+<html>
+  <head>
+    <title>upload</title>
+  </head>
+  <body>
+    <form
+      action="{{ url_for('gfg')}}"
+      method="post"
+      enctype="multipart/form-data"
+    >
+      <h2>Upload Current File</h2>
+      <div>
+        <input type="file" name="curfile" />
+
+        <!-- <select name="first_dd" id="first_dd">
+          {% for colour in variables.get("cfh") %}
+          <option value="{{colour}}" selected>{{colour}}</option>
+          {% endfor %}
+        </select> -->
+        <!-- <div> -->
+        {% for colour in variables.get("cfh") %}
+        <label class="checkbox-inline"
+          ><input
+            type="checkbox"
+            name="{{colour}}"
+            value="{{colour}}"
+          />{{colour}}</label
+        >
+        {% endfor %}
+        <label class="checkbox-inline"
+          ><input type="checkbox" name="all" value="all" />All</label
+        >
+        <!-- </div> -->
+      </div>
+      <h2>Upload New File</h2>
+      <input type="file" name="newfile" />
+
+      <p></p>
+      <input type="submit" value="Upload" />
+      <input type="button" value="Submit" onclick="onSubmit()" />
+      <input type="reset" />
+    </form>
+
+    <script>
+      function onSubmit() {
+        var e1 = document.getElementById("first_dd");
+        var fdd_text = "EE"; //e1.options[e1.selectedIndex].text;
+
+        var e2 = document.getElementById("second_dd");
+        var sdd_text = "FF"; //e2.options[e2.selectedIndex].text;
+
+        fetch(`${window.origin}/submit`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            first_option: fdd_text,
+            second_option: sdd_text,
+          }),
+        })
+          .then(function (resp) {
+            resp.ok &&
+              resp.blob().then((blob) => {
+                const elem = document.createElement("a");
+                elem.href = URL.createObjectURL(blob);
+                elem.download = "a.txt";
+                elem.click();
+              });
+
+            if (resp.status != 200) {
+              console.log("==============================");
+              console.log(resp.statusText);
+            }
+          })
+          .catch(function (error) {
+            console.log(error);
+          });
+      }
+    </script>
+
+    <!-- <script>
+      function onSubmit() {
+        // Replace 'http://your-server-url/download' with the actual endpoint to download the file
+        fetch(`${window.origin}/submit`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Expose-Headers": "Content-Disposition",
+          },
+          body: JSON.stringify({
+            first_option: 11,
+            second_option: 22,
+          }),
+        })
+          .then((response) => {
+            console.log("response.headers keys:::: ", response.headers);
+            console.log(
+              "response.headers value:::: ",
+              response.headers.values()
+            );
+            const contentDisposition = response.headers.get(
+              "Content-Disposition"
+            );
+            const filename = contentDisposition.split("filename=")[1];
+            const blob = response.blob();
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+          })
+          .catch((error) => console.error("Error downloading file:", error));
+      }
+    </script> -->
+  </body>
+</html>

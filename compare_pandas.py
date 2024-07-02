@@ -1,0 +1,151 @@
+import openpyxl
+import pandas as pd
+import numpy as np
+from openpyxl.styles import PatternFill
+# from Utilities import constant_config as constant
+# constant = {
+#     UNIQUE_QUEUES: ["GEO","PROGRAM"]
+# }
+
+# print(constant.UNIQUE_QUEUES)
+
+pd.options.mode.chained_assignment = None
+
+def get_headers(f):
+    df = pd.read_excel(f, engine='openpyxl')
+    return list(df.columns.values)
+
+
+def compare(curfile, newfile, primary_key):
+    print('curfile: ', curfile)
+    print('newfile: ', newfile)
+    df1 = pd.read_excel(curfile, engine='openpyxl')
+    df2 = pd.read_excel(newfile, engine='openpyxl')
+    print('-----1 -------')
+    # output = pandas_compare(df1, df2, './result.xlsx', primary_key=primary_key )
+    # return output
+    return {}
+
+"""
+    df1 : Dataframe
+    df2 : Data frame
+    file_path_df_result: store file path of comparison
+    primary_key : unique based need to filter and compare similar like primary key  
+                    constant.UNIQUE_QUEUES = ["GEO","PROGRAM"]
+    is_tolerance : False default for no need to check tolerance limit.
+                    True enabled means it will consider for tolerance 
+"""
+
+
+def pandas_compare(df1, df2, file_path_df_result, primary_key=["GEO","PROGRAM"], is_tolerance=False):
+    print('primary_key:: ', primary_key)
+    """Function will compare two dataframes even if rows count are not matching and stores the original two files,
+       additional rows from both dataframes if present and the delta in an Excel file."""
+    df1.replace(np.nan, 0, inplace=True)
+    df2.replace(np.nan, 0, inplace=True)
+
+    # Merge TWO DF - if all values match - both , if miss match  left  df1 and right  df2 will show
+    df_mismatch = pd.merge(df1, df2, how='outer', indicator=True)
+
+    # print('df_mismatch: ', df_mismatch)
+    # in below two condition ignoring both value and getting additional data for comparing
+    # Selecting the rows which are extra(additional data) in df1 and mismatch rows present in df1
+    df_mismatch1 = df_mismatch[df_mismatch['_merge'] == 'left_only']
+    df_mismatch1 = df_mismatch1.drop(['_merge'], axis=1)
+    # Selecting the rows which are extra(additional data) in df2 and mismatch rows present in df2
+    df_mismatch2 = df_mismatch[df_mismatch['_merge'] == 'right_only']
+    df_mismatch2 = df_mismatch2.drop(['_merge'], axis=1)
+
+
+    miss_match_df = pd.merge(df_mismatch1, df_mismatch2, how='outer', on=primary_key, indicator=True)
+
+    if len(miss_match_df[miss_match_df['_merge'] == 'both']) == 0 and (len(miss_match_df[miss_match_df['_merge']
+                                                                                         == 'left_only']) > 0 or len(
+        miss_match_df[miss_match_df['_merge'] == 'right_only']) > 0):
+        add_df1 = df_mismatch1
+        add_df2 = df_mismatch2
+        delta_mismatch = pd.DataFrame()
+    # Filtering the mismatch values and additional values in different dataframes
+    else:
+
+        filter_unique_key = "|".join(primary_key)
+
+        # Filtering out the mismatch values(not additional) in both dataframes
+        df_mismatch1, df_mismatch2 = parse_data_df_using_regex(miss_match_df, filter_unique_key, method_type='both')
+
+        # concatenating mismatch data from first dataframe row wise
+        delta_mismatch = pd.concat([df_mismatch1, df_mismatch2]).sort_index(kind='merge')
+        # print('delta_mismatch: ', delta_mismatch)
+
+        # Now checking Additional rows from dataframe 1 & dataframe 2
+        add_df1, add_df2 = parse_data_df_using_regex(miss_match_df, filter_unique_key,
+                                                     method_type='left_only|right_only')
+
+    if len(delta_mismatch) > 0 or len(add_df1) > 0 or len(add_df2) > 0:
+        print("MISMATCH FOUND.........................")
+        try:
+            with pd.ExcelWriter(file_path_df_result, engine="openpyxl") as writer:
+                add_df1.to_excel(writer, sheet_name='Actual_Additional', index=False)
+                add_df2.to_excel(writer, sheet_name='Expected_Additional', index=False)
+                delta_mismatch.to_excel(writer, sheet_name='Mismatch', index=False)    
+        except Exception as e:
+            print("Not able to create file11 {}".format(file_path_df_result))
+            print(e)
+
+        column_length = len(delta_mismatch.columns)
+        if len(delta_mismatch) > 0:
+            print("Highlighting started for mismatches")
+            add_background_colors(file_path_df_result, column_length)
+        
+        print("------ creating stream----")
+        output = BytesIO()
+        # writer = pd.ExcelWriter(output, engine='xlsxwriter')
+        # add_df1.to_excel(writer, sheet_name='Actual_Additional', index=False)
+        # add_df2.to_excel(writer, sheet_name='Expected_Additional', index=False)
+        # delta_mismatch.to_excel(writer, sheet_name='Mismatch', index=False)
+        # writer.close()
+        # output.seek(0)
+
+        return output
+    else:
+        print("NO MISMATCH FOUND.........................")
+
+
+def parse_data_df_using_regex(data_frame, regex_value, method_type='both'):
+    # To remove _x and _y value and slice by x and y values to filter to create two df
+    if '|' in method_type:
+        method_type_value = method_type.split('|')[0]
+    else:
+        method_type_value = method_type
+    common_df = data_frame[data_frame['_merge'] == method_type_value]
+    common_df = common_df.drop(['_merge'], axis=1)
+    df1 = common_df.filter(regex=str(regex_value) + '|_x')
+    df1.columns = df1.columns.str.replace('_x', '')
+
+    if '|' in method_type:
+        method_type_value = method_type.split('|')[1]
+        common_df = data_frame[data_frame['_merge'] == method_type_value]
+        common_df = common_df.drop(['_merge'], axis=1)
+
+    df2 = common_df.filter(regex=str(regex_value) + '|_y')
+    df2.columns = df2.columns.str.replace('_y', '')
+
+    return df1, df2
+
+
+def add_background_colors(path, column_length):
+    wb = openpyxl.load_workbook(path)
+    ws = wb['Mismatch']
+    fill_cell = PatternFill(patternType='solid', fgColor='FC2C03')
+    for i in range(2, ws.max_row, 2):
+        for j in range(6, column_length + 1):
+            if ws.cell(row=i, column=j).value == ws.cell(row=i + 1, column=j).value:
+                continue
+            else:
+                ws.cell(row=i, column=j).fill = fill_cell
+                ws.cell(row=i + 1, column=j).fill = fill_cell
+    wb.save(path)
+
+
+# if __name__ == '__main__':
+#     pass
