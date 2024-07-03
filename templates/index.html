@@ -4,21 +4,15 @@
   </head>
   <body>
     <form
-      action="{{ url_for('gfg')}}"
+      id="form-id"
+      onsubmit="return upload_files(event)"
       method="post"
       enctype="multipart/form-data"
     >
       <h2>Upload Current File</h2>
       <div>
         <input type="file" name="curfile" />
-
-        <!-- <select name="first_dd" id="first_dd">
-          {% for colour in variables.get("cfh") %}
-          <option value="{{colour}}" selected>{{colour}}</option>
-          {% endfor %}
-        </select> -->
-        <!-- <div> -->
-        {% for colour in variables.get("cfh") %}
+        <!-- {% for colour in cfh %}
         <label class="checkbox-inline"
           ><input
             type="checkbox"
@@ -29,40 +23,78 @@
         {% endfor %}
         <label class="checkbox-inline"
           ><input type="checkbox" name="all" value="all" />All</label
-        >
-        <!-- </div> -->
+        > -->
+
+        <div id="result"></div>
       </div>
       <h2>Upload New File</h2>
       <input type="file" name="newfile" />
 
       <p></p>
       <input type="submit" value="Upload" />
-      <input type="button" value="Submit" onclick="onSubmit()" />
+      <input type="submit" value="Submit" onclick="onSubmit(event)" />
       <input type="reset" />
     </form>
 
     <script>
-      function onSubmit() {
-        var e1 = document.getElementById("first_dd");
-        var fdd_text = "EE"; //e1.options[e1.selectedIndex].text;
+      function print_headers(values) {
+        var result = "";
+        for (i = 0; i < values.length; i++) {
+          result += `<label class='checkbox-inline'> <input type='checkbox' name=${values[i]} value=${values[i]}/> ${values[i]} </label>`;
+        }
+        result += `<label class='checkbox-inline'> <input type='checkbox' name=all value=all/> all </label>`;
+        document.getElementById("result").innerHTML = result;
+      }
 
-        var e2 = document.getElementById("second_dd");
-        var sdd_text = "FF"; //e2.options[e2.selectedIndex].text;
+      function upload_files(e) {
+        e.preventDefault();
+        // return;
 
-        fetch(`${window.origin}/submit`, {
+        const form = e.target;
+        const formData = new FormData(form); // grab the data inside the form fields
+
+        console.log("formData: ", formData);
+        fetch("/upload", {
+          // assuming the backend is hosted on the same server
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            first_option: fdd_text,
-            second_option: sdd_text,
-          }),
+          body: formData,
         })
+          .then((response) => response.json())
+          .then((response) => {
+            print_headers(response.cfh);
+          })
+          .catch((err) => {
+            console.log("errr::", err);
+          });
+      }
+
+      function onSubmit(e) {
+        e.preventDefault();
+
+        var ee = document.getElementById("form-id");
+        // console.log("ee: ", ee);
+        // var e1 = document.getElementById("first_dd");
+        // var fdd_text = "EE"; //e1.options[e1.selectedIndex].text;
+
+        // var e2 = document.getElementById("second_dd");
+        // var sdd_text = "FF"; //e2.options[e2.selectedIndex].text;
+
+        // console.log("onSubmitonSubmitonSubmit: ", e.target);
+
+        // const form = e.target;
+        const formData = new FormData(ee); // grab the data inside the form fields
+
+        fetch("/submit", {
+          method: "POST",
+          body: formData,
+        })
+          // .then((r) => r.json())
           .then(function (resp) {
             resp.ok &&
               resp.blob().then((blob) => {
                 const elem = document.createElement("a");
                 elem.href = URL.createObjectURL(blob);
-                elem.download = "a.txt";
+                elem.download = "a.xlsx";
                 elem.click();
               });
 

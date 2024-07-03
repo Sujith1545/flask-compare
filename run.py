@@ -1,8 +1,10 @@
 from flask import *  
 from werkzeug.utils import secure_filename
 import os
-from compare_pandas import compare, get_headers
+from compare_pandas import compare, get_headers, get_df, compare_v2
 from io import BytesIO
+import pandas as pd
+
 
 app = Flask(__name__)  
 
@@ -20,31 +22,48 @@ cfh = [] #['Red', 'Blue', 'Black', 'Orange']
 curfile = None
 newfile = None
 
+cfh_df = None
+nfh_df = None
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-@app.route('/', methods =["GET", "POST"])  
-def gfg():  
+@app.route('/')  
+def index():  
     global cfh
-    # global nfh
-
-    global curfile
-    global newfile
-
-    if request.method == "POST":
-        colours = ['Red', 'Blue', 'Black', 'Orange']
-        if 'curfile' not in request.files or 'newfile' not in request.files:
-            flash("Sorry, the upload didn't send all of the data!")
-            return redirect(request.url)
-        curfile = request.files["curfile"]
-        newfile = request.files["newfile"]
+    return render_template("index.html", cfh=cfh)  
         
-        cfh = get_headers(curfile)
-        # nfh = get_headers(newfile)
-   
-    return render_template("index.html", variables={"cfh": cfh})  
+    
+
+@app.route('/upload', methods =["POST"])  
+def upload_files():  
+    # global cfh
+
+    # return jsonify({'ee': 333333, "cfh":['Red', 'Blue', 'Black', 'Orange']})
+    
+    # return render_template("index.html", cfh=['Red', 'Blue', 'Black', 'Orange'])  
+
+    # if request.method == "POST":
+    print('---- POST: call : ')
+    colours = ['Red', 'Blue', 'Black', 'Orange']
+    if 'curfile' not in request.files or 'newfile' not in request.files:
+        flash("Sorry, the upload didn't send all of the data!")
+        return redirect(request.url)
+    curfile = request.files["curfile"]
+    newfile = request.files["newfile"]
+    
+    curfile.save('file1.xlsx')
+    newfile.save('file2.xlsx')
+
+    # cfh = ['Red', 'Blue', 'Black', 'Orange'] 
+    cfh = get_headers(curfile)
+    print('cfh: ', cfh)
+    return jsonify({"cfh":cfh})
+    # return render_template("index.html", cfh=cfh)  
+
+
 
 # @app.route('/success', methods = ['POST'])  
 # def success():  
@@ -56,19 +75,14 @@ def gfg():
 
 @app.route('/submit', methods = ['POST'])  
 def submit():
-    global cfh
-    # global nfh
+    curfile = request.files.get('curfile')
+    newfile = request.files.get('newfile')
+    keys = [i for i in request.form]
 
-    global curfile
-    global newfile
-
-    cfh = []
-
-    payload = request.json
-    print("---------", payload)
- 
-    output = compare(curfile, newfile, ["Month","Category"])
-    return send_file(output, download_name="testfile.txt", as_attachment=True)
+    print('keys:: ', request.form)
+    # output = compare_v2(cfh_df, nfh_df, ["Month","Category"])
+    output = compare(curfile, newfile, keys)
+    return send_file('./result.xlsx', download_name="testfile.txt", as_attachment=True)
     # return send_file(BytesIO(b"Hello World!"), download_name="testfile.txt", as_attachment=True)
 
 
