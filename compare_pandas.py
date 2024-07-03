@@ -2,6 +2,7 @@ import openpyxl
 import pandas as pd
 import numpy as np
 from openpyxl.styles import PatternFill
+from io import BytesIO
 # from Utilities import constant_config as constant
 # constant = {
 #     UNIQUE_QUEUES: ["GEO","PROGRAM"]
@@ -15,16 +16,26 @@ def get_headers(f):
     df = pd.read_excel(f, engine='openpyxl')
     return list(df.columns.values)
 
+def get_df(f):
+    df = pd.read_excel(f, engine='openpyxl')
+    return df
+
 
 def compare(curfile, newfile, primary_key):
     print('curfile: ', curfile)
     print('newfile: ', newfile)
     df1 = pd.read_excel(curfile, engine='openpyxl')
     df2 = pd.read_excel(newfile, engine='openpyxl')
-    print('-----1 -------')
-    # output = pandas_compare(df1, df2, './result.xlsx', primary_key=primary_key )
-    # return output
-    return {}
+    
+    output = pandas_compare(df1, df2, './result.xlsx', primary_key=primary_key )
+    return output
+    # return {}
+
+
+def compare_v2(df1, df2, primary_key):
+    output = pandas_compare(df1, df2, './result.xlsx', primary_key=primary_key )
+    return output
+
 
 """
     df1 : Dataframe
@@ -98,7 +109,7 @@ def pandas_compare(df1, df2, file_path_df_result, primary_key=["GEO","PROGRAM"],
             add_background_colors(file_path_df_result, column_length)
         
         print("------ creating stream----")
-        output = BytesIO()
+        # output = BytesIO()
         # writer = pd.ExcelWriter(output, engine='xlsxwriter')
         # add_df1.to_excel(writer, sheet_name='Actual_Additional', index=False)
         # add_df2.to_excel(writer, sheet_name='Expected_Additional', index=False)
@@ -106,7 +117,7 @@ def pandas_compare(df1, df2, file_path_df_result, primary_key=["GEO","PROGRAM"],
         # writer.close()
         # output.seek(0)
 
-        return output
+        return True
     else:
         print("NO MISMATCH FOUND.........................")
 
