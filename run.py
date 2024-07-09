@@ -13,7 +13,7 @@ UPLOAD_FOLDER = 'uploads/'
 ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'csv'}
 
 app.config['SECRET_KEY'] = 'secret'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1000 * 1000
+app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 cfh = [] #['Red', 'Blue', 'Black', 'Orange']
@@ -39,12 +39,6 @@ def index():
 
 @app.route('/upload', methods =["POST"])  
 def upload_files():  
-    # global cfh
-
-    # return jsonify({'ee': 333333, "cfh":['Red', 'Blue', 'Black', 'Orange']})
-    
-    # return render_template("index.html", cfh=['Red', 'Blue', 'Black', 'Orange'])  
-
     # if request.method == "POST":
     print('---- POST: call : ')
     colours = ['Red', 'Blue', 'Black', 'Orange']
@@ -54,8 +48,8 @@ def upload_files():
     curfile = request.files["curfile"]
     newfile = request.files["newfile"]
     
-    curfile.save('file1.xlsx')
-    newfile.save('file2.xlsx')
+    curfile.save('uploads/file1.xlsx')
+    newfile.save('uploads/file2.xlsx')
 
     # cfh = ['Red', 'Blue', 'Black', 'Orange'] 
     cfh = get_headers(curfile)
@@ -79,10 +73,10 @@ def submit():
     newfile = request.files.get('newfile')
     keys = [i for i in request.form]
 
-    print('keys:: ', request.form)
+    # print('keys:: ', request.form)
     # output = compare_v2(cfh_df, nfh_df, ["Month","Category"])
     output = compare(curfile, newfile, keys)
-    return send_file('./result.xlsx', download_name="testfile.txt", as_attachment=True)
+    return send_file('./uploads/result.xlsx', download_name="testfile.txt", as_attachment=True)
     # return send_file(BytesIO(b"Hello World!"), download_name="testfile.txt", as_attachment=True)
 
 

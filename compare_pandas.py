@@ -22,8 +22,8 @@ def get_df(f):
 
 
 def compare(curfile, newfile, primary_key):
-    print('curfile: ', curfile)
-    print('newfile: ', newfile)
+    # print('curfile: ', curfile)
+    # print('newfile: ', newfile)
     df1 = pd.read_excel(curfile, engine='openpyxl')
     df2 = pd.read_excel(newfile, engine='openpyxl')
     
@@ -83,6 +83,13 @@ def pandas_compare(df1, df2, file_path_df_result, primary_key=["GEO","PROGRAM"],
 
         # Filtering out the mismatch values(not additional) in both dataframes
         df_mismatch1, df_mismatch2 = parse_data_df_using_regex(miss_match_df, filter_unique_key, method_type='both')
+        
+        df_mismatch1.insert(0, 'type', 'file1')
+        df_mismatch2.insert(0, 'type', 'file2')
+
+        print('--df_mismatch1--: ',  df_mismatch1)
+        print('--df_mismatch2--: ',  df_mismatch2)
+
 
         # concatenating mismatch data from first dataframe row wise
         delta_mismatch = pd.concat([df_mismatch1, df_mismatch2]).sort_index(kind='merge')

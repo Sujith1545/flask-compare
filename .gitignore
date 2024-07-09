@@ -4,3 +4,4 @@ venv/*
 .venv/*
 *.xlsx
 __pycache__
+uploads/*
