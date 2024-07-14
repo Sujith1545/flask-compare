@@ -2,7 +2,9 @@ import openpyxl
 import pandas as pd
 import numpy as np
 from openpyxl.styles import PatternFill
-from io import BytesIO
+# from io import BytesIO
+import os
+from io import StringIO, BytesIO
 # from Utilities import constant_config as constant
 # constant = {
 #     UNIQUE_QUEUES: ["GEO","PROGRAM"]
@@ -12,11 +14,60 @@ from io import BytesIO
 
 pd.options.mode.chained_assignment = None
 
+
 def get_headers(f):
     df = pd.read_excel(f, engine='openpyxl')
     return list(df.columns.values)
 
+def get_headersV2(df):
+    df1 = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+    h = list(df1.columns.values)
+    return h
+
+def read_file(f):
+    split_tup = os.path.splitext(f.filename)
+    file_extension = split_tup[1]
+    if file_extension == '.csv':
+        df = pd.read_csv(f)
+        df.drop(df.columns[df.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
+        # df1 = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        return df
+    if file_extension == '.xlsx':
+        df = pd.read_excel(f, engine='openpyxl')
+        # df1 = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+        df.drop(df.columns[df.columns.str.contains('unnamed',case = False)],axis = 1, inplace = True)
+        return df
+    return None
+
+
+def to_xlsx(in_file_path, out_file_path):
+    split_tup = os.path.splitext(in_file_path)
+    file_extension = split_tup[1]
+    if file_extension == '.csv':
+        read_file = pd.read_csv(in_file_path)
+        read_file.to_excel(out_file_path, index=None, header=True)
+    if file_extension == '.xlsx':
+        df = pd.read_excel(in_file_path, engine='openpyxl')
+        df.to_excel(out_file_path)
+    return
+    
+        
+
+
+def get_df_v2(fObj):
+    split_tup = os.path.splitext(fObj.filename)
+    file_extension = split_tup[1]
+    if file_extension == '.xlsx':
+        df = pd.read_excel(fObj, engine='openpyxl')
+        return df
+    if file_extension == '.csv':
+        print('fObj: ', fObj)
+        df = pd.read_csv('uploads/file1.xlsx', sep="\s+")
+        return df
+    return None
+
 def get_df(f):
+    # split_tup = os.path.splitext('my_file.txt')
     df = pd.read_excel(f, engine='openpyxl')
     return df
 
@@ -24,16 +75,18 @@ def get_df(f):
 def compare(curfile, newfile, primary_key):
     # print('curfile: ', curfile)
     # print('newfile: ', newfile)
-    df1 = pd.read_excel(curfile, engine='openpyxl')
-    df2 = pd.read_excel(newfile, engine='openpyxl')
+    df1 = get_df_v2(curfile)
+    df2 = get_df_v2(newfile)
+
+    print('curfile: ', df1)
     
-    output = pandas_compare(df1, df2, './result.xlsx', primary_key=primary_key )
+    output = pandas_compare(df1, df2, './upload/result.xlsx', primary_key=primary_key )
     return output
     # return {}
 
 
 def compare_v2(df1, df2, primary_key):
-    output = pandas_compare(df1, df2, './result.xlsx', primary_key=primary_key )
+    output = pandas_compare(df1, df2, './uploads/result.xlsx', primary_key=primary_key )
     return output
 
 

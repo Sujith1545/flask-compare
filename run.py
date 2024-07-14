@@ -1,9 +1,11 @@
 from flask import *  
 from werkzeug.utils import secure_filename
 import os
-from compare_pandas import compare, get_headers, get_df, compare_v2
-from io import BytesIO
-import pandas as pd
+from compare_pandas import *
+# from io import BytesIO
+# import pandas as pd
+# from io import StringIO, BytesIO
+from flask_session import Session
 
 
 app = Flask(__name__)  
@@ -16,14 +18,16 @@ app.config['SECRET_KEY'] = 'secret'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
+Session(app)
+
 cfh = [] #['Red', 'Blue', 'Black', 'Orange']
 # nfh = []
 
 curfile = None
 newfile = None
 
-cfh_df = None
-nfh_df = None
 
 
 def allowed_file(filename):
@@ -47,14 +51,45 @@ def upload_files():
         return redirect(request.url)
     curfile = request.files["curfile"]
     newfile = request.files["newfile"]
+
+
+    # d = pd.read_csv(curfile)
+    # print('ddddd: dddd: ', d)
     
-    curfile.save('uploads/file1.xlsx')
-    newfile.save('uploads/file2.xlsx')
+    # file1_path = 'uploads/' + curfile.filename
+    # file2_path = 'uploads/' + newfile.filename
+
+    # curfile.save(file1_path)
+    # newfile.save(file2_path)
+
+    # to_xlsx(file1_path, 'uploads/out1.xlsx')
+    # to_xlsx(file2_path, 'uploads/out2.xlsx')
 
     # cfh = ['Red', 'Blue', 'Black', 'Orange'] 
-    cfh = get_headers(curfile)
-    print('cfh: ', cfh)
-    return jsonify({"cfh":cfh})
+    # d1 = get_df_v2(curfile)
+    # print('dddddd 1: ', d1)
+    # d2 = get_df_v2(newfile)
+    # print('dddddd 2: ', d2)
+    df1 = read_file(curfile)
+    df2 = read_file(newfile)
+
+    session['df1'] = df1
+    session['df2'] = df2
+
+    # print('session : ', session)
+    # print('h1 : ', df1)
+    # print('h2 : ', df2)
+
+    h1 = get_headersV2(df1)
+    h2 = get_headersV2(df2)
+
+    # print('h1 : ', h1)
+    # print('h2 : ', h2)
+
+    # cfh =  [] #get_headers(curfile)
+    cfh = get_headersV2(df1)
+    # print('cfh: ', h1)
+    return jsonify({"cfh": cfh})
     # return render_template("index.html", cfh=cfh)  
 
 
@@ -69,13 +104,18 @@ def upload_files():
 
 @app.route('/submit', methods = ['POST'])  
 def submit():
-    curfile = request.files.get('curfile')
-    newfile = request.files.get('newfile')
+    df1 = session.get('df1', None)
+    df2 = session.get('df2', None)
+
     keys = [i for i in request.form]
 
+    if keys == []:
+        return {'message': 'No keys found'}, 300
+
     # print('keys:: ', request.form)
-    # output = compare_v2(cfh_df, nfh_df, ["Month","Category"])
-    output = compare(curfile, newfile, keys)
+    output = compare_v2(df1, df2, keys)
+    # print('output: ', output)
+    # output = compare(curfile, newfile, keys)
     return send_file('./uploads/result.xlsx', download_name="testfile.txt", as_attachment=True)
     # return send_file(BytesIO(b"Hello World!"), download_name="testfile.txt", as_attachment=True)
 
