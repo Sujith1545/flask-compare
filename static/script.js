@@ -34,6 +34,11 @@ uploadForm1.addEventListener("submit", function (e) {
           .getElementById("upload-file-1")
           .classList.add("uploaded-button");
         document.getElementById("upload-file-1").value = "File 1 Uploaded";
+
+        // Show header selection section after file 1 upload
+        updateHeaderSelection();
+
+        // If file 2 is already uploaded, show header selection section
         if (file2Uploaded) {
           updateHeaderSelection();
         }
@@ -59,6 +64,7 @@ uploadForm2.addEventListener("submit", function (e) {
           .getElementById("upload-file-2")
           .classList.add("uploaded-button");
         document.getElementById("upload-file-2").value = "File 2 Uploaded";
+        // Show header selection section if file 1 is already uploaded
         if (file1Uploaded) {
           updateHeaderSelection();
         }
