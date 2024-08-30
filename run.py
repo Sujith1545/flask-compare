@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify, send_file, render_template
 import pandas as pd
 import io
+from compare_pandasV2 import pandas_compare, compare_headers
 
 app = Flask(__name__)
 
@@ -68,22 +69,28 @@ def process_files():
     # Process the files based on selected headers
     df1 = uploaded_files['file1']
     df2 = uploaded_files['file2']
-    
-    try:
-        # Example processing: merging two DataFrames on selected headers
-        result_df = df1[list(selected_headers)].merge(df2[list(selected_headers)], how='inner')
-    except KeyError as e:
-        return jsonify({'error': f'KeyError: {str(e)}'}), 400
 
-    # Convert the result DataFrame to a byte stream
-    result_stream = io.BytesIO()
-    with pd.ExcelWriter(result_stream, engine='xlsxwriter') as writer:
-        result_df.to_excel(writer, index=False)
+
+    try:
+        error = compare_headers(df2, selected_headers)
+        if error:
+             return jsonify({'error': f'2: {str(error)}'}), 400
+    except ValueError as e:
+        return jsonify({'error': f'3: {str(e)}'}), 400
     
-    result_stream.seek(0)
+    print('still runnnign....')
+    result_df = None
+    try:
+        result_df = pandas_compare(df1, df2, selected_headers)
+        if result_df is None:
+            return jsonify({'error': f'No Match found 1'}), 400
+    except KeyError as e:
+        return jsonify({'error': f'KeyError 2: {str(e)}'}), 400
+
+    
 
     return send_file(
-        result_stream,
+        result_df,
         as_attachment=True,
         download_name='result.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

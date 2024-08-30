@@ -1,0 +1,18 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Flask",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/run.py",
+      "console": "integratedTerminal",
+      "env": {
+        "FLASK_APP": "app.py",
+        "FLASK_ENV": "development" // Optional: Set to 'production' if needed
+      },
+      "args": ["run"],
+      "justMyCode": true
+    }
+  ]
+}
