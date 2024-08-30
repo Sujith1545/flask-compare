@@ -1,149 +1,30 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <title>upload</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Upload and Processing</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <form
-      id="form-id"
-      onsubmit="return upload_files(event)"
-      method="post"
-      enctype="multipart/form-data"
-    >
-      <h2>Upload Current File</h2>
-      <div>
-        <input type="file" name="curfile" />
-        <!-- {% for colour in cfh %}
-        <label class="checkbox-inline"
-          ><input
-            type="checkbox"
-            name="{{colour}}"
-            value="{{colour}}"
-          />{{colour}}</label
-        >
-        {% endfor %}
-        <label class="checkbox-inline"
-          ><input type="checkbox" name="all" value="all" />All</label
-        > -->
+    <h1>File Upload and Processing</h1>
 
-        <div id="result"></div>
-      </div>
-      <h2>Upload New File</h2>
-      <input type="file" name="newfile" />
-
-      <p></p>
-      <input type="submit" value="Upload" />
-      <input type="submit" value="Submit" onclick="onSubmit(event)" />
-      <input type="reset" />
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".xlsx, .csv" required />
+      <input type="submit" value="Upload File 1" id="upload-file-1" />
     </form>
 
-    <script>
-      function print_headers(values) {
-        var result = "";
-        for (i = 0; i < values.length; i++) {
-          result += `<label class='checkbox-inline'> <input type='checkbox' name=${values[i]} value=${values[i]}/> ${values[i]} </label>`;
-        }
-        result += `<label class='checkbox-inline'> <input type='checkbox' name=all value=all/> all </label>`;
-        document.getElementById("result").innerHTML = result;
-      }
+    <form id="upload-second-form" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".xlsx, .csv" required />
+      <input type="submit" value="Upload File 2" id="upload-file-2" />
+    </form>
 
-      function upload_files(e) {
-        e.preventDefault();
-        // return;
+    <div id="header-selection-container" style="display: none">
+      <!-- Header selection will be dynamically inserted here -->
+    </div>
 
-        const form = e.target;
-        const formData = new FormData(form); // grab the data inside the form fields
+    <div id="loader" class="loader" style="display: none"></div>
 
-        console.log("formData: ", formData);
-        fetch("/upload", {
-          // assuming the backend is hosted on the same server
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((response) => {
-            print_headers(response.cfh);
-          })
-          .catch((err) => {
-            console.log("errr::", err);
-          });
-      }
-
-      function onSubmit(e) {
-        e.preventDefault();
-
-        var ee = document.getElementById("form-id");
-        // console.log("ee: ", ee);
-        // var e1 = document.getElementById("first_dd");
-        // var fdd_text = "EE"; //e1.options[e1.selectedIndex].text;
-
-        // var e2 = document.getElementById("second_dd");
-        // var sdd_text = "FF"; //e2.options[e2.selectedIndex].text;
-
-        // console.log("onSubmitonSubmitonSubmit: ", e.target);
-
-        // const form = e.target;
-        const formData = new FormData(ee); // grab the data inside the form fields
-
-        fetch("/submit", {
-          method: "POST",
-          body: formData,
-        })
-          // .then((r) => r.json())
-          .then(function (resp) {
-            resp.ok &&
-              resp.blob().then((blob) => {
-                const elem = document.createElement("a");
-                elem.href = URL.createObjectURL(blob);
-                elem.download = "a.xlsx";
-                elem.click();
-              });
-
-            if (resp.status != 200) {
-              console.log("==============================");
-              console.log(resp.statusText);
-            }
-          })
-          .catch(function (error) {
-            console.log(error);
-          });
-      }
-    </script>
-
-    <!-- <script>
-      function onSubmit() {
-        // Replace 'http://your-server-url/download' with the actual endpoint to download the file
-        fetch(`${window.origin}/submit`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Access-Control-Expose-Headers": "Content-Disposition",
-          },
-          body: JSON.stringify({
-            first_option: 11,
-            second_option: 22,
-          }),
-        })
-          .then((response) => {
-            console.log("response.headers keys:::: ", response.headers);
-            console.log(
-              "response.headers value:::: ",
-              response.headers.values()
-            );
-            const contentDisposition = response.headers.get(
-              "Content-Disposition"
-            );
-            const filename = contentDisposition.split("filename=")[1];
-            const blob = response.blob();
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-          })
-          .catch((error) => console.error("Error downloading file:", error));
-      }
-    </script> -->
+    <script src="script.js"></script>
   </body>
 </html>

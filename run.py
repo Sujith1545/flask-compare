@@ -1,124 +1,78 @@
-from flask import *  
-from werkzeug.utils import secure_filename
-import os
-from compare_pandas import *
-# from io import BytesIO
-# import pandas as pd
-# from io import StringIO, BytesIO
-from flask_session import Session
+from flask import Flask, request, jsonify, send_file, render_template
+import pandas as pd
+import io
 
+app = Flask(__name__)
 
-app = Flask(__name__)  
+# In-memory storage for files
+uploaded_files = {}
+headers = []
 
+@app.route('/')
+def index():
+    return render_template('index.html')
 
-UPLOAD_FOLDER = 'uploads/'
-ALLOWED_EXTENSIONS = {'xlsx', 'xls', 'csv'}
-
-app.config['SECRET_KEY'] = 'secret'
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-
-app.config["SESSION_PERMANENT"] = False
-app.config["SESSION_TYPE"] = "filesystem"
-Session(app)
-
-cfh = [] #['Red', 'Blue', 'Black', 'Orange']
-# nfh = []
-
-curfile = None
-newfile = None
-
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-@app.route('/')  
-def index():  
-    global cfh
-    return render_template("index.html", cfh=cfh)  
-        
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    global uploaded_files
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'error': 'No file uploaded'}), 400
     
+    # Read the file into a DataFrame
+    df = pd.read_excel(file)
+    uploaded_files['file1'] = df
 
-@app.route('/upload', methods =["POST"])  
-def upload_files():  
-    # if request.method == "POST":
-    print('---- POST: call : ')
-    colours = ['Red', 'Blue', 'Black', 'Orange']
-    if 'curfile' not in request.files or 'newfile' not in request.files:
-        flash("Sorry, the upload didn't send all of the data!")
-        return redirect(request.url)
-    curfile = request.files["curfile"]
-    newfile = request.files["newfile"]
+    # Extract headers
+    global headers
+    headers = df.columns.tolist()
 
+    return jsonify({'headers': headers})
 
-    # d = pd.read_csv(curfile)
-    # print('ddddd: dddd: ', d)
+@app.route('/upload_second', methods=['POST'])
+def upload_second_file():
+    global uploaded_files
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'error': 'No file uploaded'}), 400
     
-    # file1_path = 'uploads/' + curfile.filename
-    # file2_path = 'uploads/' + newfile.filename
+    # Read the second file into a DataFrame
+    df = pd.read_excel(file)
+    uploaded_files['file2'] = df
 
-    # curfile.save(file1_path)
-    # newfile.save(file2_path)
+    return jsonify({'message': 'File 2 uploaded successfully'})
 
-    # to_xlsx(file1_path, 'uploads/out1.xlsx')
-    # to_xlsx(file2_path, 'uploads/out2.xlsx')
+@app.route('/process', methods=['POST'])
+def process_files():
+    if 'file1' not in uploaded_files or 'file2' not in uploaded_files:
+        return jsonify({'error': 'Both files must be uploaded'}), 400
+    
+    data = request.json
+    selected_headers = data.get('headers')
 
-    # cfh = ['Red', 'Blue', 'Black', 'Orange'] 
-    # d1 = get_df_v2(curfile)
-    # print('dddddd 1: ', d1)
-    # d2 = get_df_v2(newfile)
-    # print('dddddd 2: ', d2)
-    df1 = read_file(curfile)
-    df2 = read_file(newfile)
+    if not selected_headers:
+        return jsonify({'error': 'No headers selected'}), 400
 
-    session['df1'] = df1
-    session['df2'] = df2
+    # Process the files based on selected headers
+    df1 = uploaded_files['file1']
+    df2 = uploaded_files['file2']
+    
+    # Example processing: merging two DataFrames on selected headers
+    result_df = df1[selected_headers].merge(df2[selected_headers], how='inner')
 
-    # print('session : ', session)
-    # print('h1 : ', df1)
-    # print('h2 : ', df2)
+    # Convert the result DataFrame to a byte stream
+    result_stream = io.BytesIO()
+    with pd.ExcelWriter(result_stream, engine='xlsxwriter') as writer:
+        result_df.to_excel(writer, index=False)
+    
+    result_stream.seek(0)
 
-    h1 = get_headersV2(df1)
-    h2 = get_headersV2(df2)
+    return send_file(
+        result_stream,
+        as_attachment=True,
+        download_name='result.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
-    # print('h1 : ', h1)
-    # print('h2 : ', h2)
-
-    # cfh =  [] #get_headers(curfile)
-    cfh = get_headersV2(df1)
-    # print('cfh: ', h1)
-    return jsonify({"cfh": cfh})
-    # return render_template("index.html", cfh=cfh)  
-
-
-
-# @app.route('/success', methods = ['POST'])  
-# def success():  
-#     if request.method == 'POST':  
-#         f = request.files['file']  
-#         f.save(f.filename)  
-#         return render_template("success.html", name = f.filename)  
-
-
-@app.route('/submit', methods = ['POST'])  
-def submit():
-    df1 = session.get('df1', None)
-    df2 = session.get('df2', None)
-
-    keys = [i for i in request.form]
-
-    if keys == []:
-        return {'message': 'No keys found'}, 300
-
-    # print('keys:: ', request.form)
-    output = compare_v2(df1, df2, keys)
-    # print('output: ', output)
-    # output = compare(curfile, newfile, keys)
-    return send_file('./uploads/result.xlsx', download_name="testfile.txt", as_attachment=True)
-    # return send_file(BytesIO(b"Hello World!"), download_name="testfile.txt", as_attachment=True)
-
-
-if __name__ == '__main__':  
-    app.run(host= '0.0.0.0', debug = True)  
+if __name__ == '__main__':
+    app.run(debug=True)
