@@ -51,6 +51,23 @@ def upload_second_file():
 
     return jsonify({'message': 'File 2 uploaded successfully'})
 
+
+@app.route('/compare_headers', methods=['POST'])
+def compare_headers_route():
+    if 'file1' not in uploaded_files or 'file2' not in uploaded_files:
+        return jsonify({'error': 'Both files must be uploaded'}), 400
+
+    df1 = uploaded_files['file1']
+    df2 = uploaded_files['file2']
+
+    # Compare headers
+    error_message = compare_headers(df1, df2)
+    if error_message:
+        return jsonify({'error': error_message}), 400
+
+    return jsonify({'message': 'Headers matched successfully'})
+
+
 @app.route('/process', methods=['POST'])
 def process_files():
     if 'file1' not in uploaded_files or 'file2' not in uploaded_files:
@@ -71,14 +88,14 @@ def process_files():
     df2 = uploaded_files['file2']
 
 
-    try:
-        error = compare_headers(df1, df2, selected_headers)
-        if len(error) > 0:
-             return jsonify({'error': f'2: {str(error)}'}), 400
-    except ValueError as e:
-        return jsonify({'error': f'3: {str(e)}'}), 400
+    # try:
+    #     error = compare_headers(df1, df2, selected_headers)
+    #     if len(error) > 0:
+    #          return jsonify({'error': f'2: {str(error)}'}), 400
+    # except ValueError as e:
+    #     return jsonify({'error': f'3: {str(e)}'}), 400
     
-    print('still runnnign....')
+    # print('still runnnign....')
     result_df = None
     try:
         result_df = pandas_compare(df1, df2, selected_headers)

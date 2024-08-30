@@ -102,8 +102,57 @@ button:hover {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
+  width: 100px;
 }
 
 #reset-button:hover {
   background-color: #d32f2f; /* Darker red on hover */
+}
+
+/* Loader Styles */
+.loader {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  border-top: 3px solid #4caf50;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+.compare-small-button {
+  width: 200px;
+  /* padding: 0px 2px; */
+  font-size: 14px;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  background-color: #4c99af; /* Default background color */
+  cursor: pointer; /* Pointer cursor by default */
+  transition: background-color 0.3s; /* Smooth transition for background color */
+}
+
+.compare-small-button:disabled {
+  width: 200px;
+  /* padding: 0px 2px; */
+  font-size: 14px;
+  color: white;
+  border: none;
+  border-radius: 3px;
+  background-color: #96abb1; /* Disabled background color */
+  cursor: not-allowed; /* Cursor indicating button is disabled */
+  transition: none; /* No transition for disabled state */
+}
+
+/* Disable hover effect on disabled button */
+.compare-small-button:enabled:hover {
+  background-color: #08a19f; /* Hover background color */
 }

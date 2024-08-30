@@ -11,21 +11,28 @@
   </head>
   <body>
     <h1>File Upload and Processing</h1>
-    <label>Only xlsx, csv format supported</label>
 
     <form id="upload-form" enctype="multipart/form-data">
       <input type="file" name="file" accept=".xlsx, .csv" required />
       <input type="submit" value="Upload File 1" id="upload-file-1" />
+      <div id="upload-file-1-loader" class="loader" style="display: none"></div>
     </form>
 
     <form id="upload-second-form" enctype="multipart/form-data">
       <input type="file" name="file" accept=".xlsx, .csv" required />
       <input type="submit" value="Upload File 2" id="upload-file-2" />
+      <div id="upload-file-2-loader" class="loader" style="display: none"></div>
     </form>
+
+    <button id="compare-headers-btn" class="compare-small-button" disabled>
+      Compare Headers
+    </button>
 
     <div id="header-selection-container" style="display: none">
       <!-- Header selection will be dynamically inserted here -->
     </div>
+
+    <button id="reset-button">Reset</button>
 
     <div id="loader" class="loader" style="display: none"></div>
 
