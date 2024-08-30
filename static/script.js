@@ -47,7 +47,7 @@ uploadForm1.addEventListener("submit", function (e) {
 uploadForm2.addEventListener("submit", function (e) {
   e.preventDefault();
   const formData = new FormData(uploadForm2);
-  fetch("/upload", {
+  fetch("/upload_second", {
     method: "POST",
     body: formData,
   })
@@ -71,26 +71,26 @@ uploadForm2.addEventListener("submit", function (e) {
 
 function updateHeaderSelection() {
   headerSelectionContainer.innerHTML = `
-        <h2>Select Headers for Processing</h2>
-        <div id="select-all-container">
-            <input type="checkbox" id="select-all" /> <label for="select-all"><strong>Select All</strong></label>
-        </div>
-        <form id="header-form">
-            ${headers
-              .map(
-                (header) => `
-                <div>
-                    <input type="checkbox" name="headers" value="${header}" ${
-                  selectedHeaders.includes(header) ? "checked" : ""
-                }> 
-                    ${header}
-                </div>
-            `
-              )
-              .join("")}
-            <input type="submit" value="Submit Selected" id="submit-selected">
-        </form>
-    `;
+    <h2>Select Headers for Processing</h2>
+    <div id="select-all-container">
+        <input type="checkbox" id="select-all" /> <label for="select-all"><strong>Select All</strong></label>
+    </div>
+    <form id="header-form">
+        ${headers
+          .map(
+            (header) => `
+            <div>
+                <input type="checkbox" name="headers" value="${header}" ${
+              selectedHeaders.includes(header) ? "checked" : ""
+            }> 
+                ${header}
+            </div>
+        `
+          )
+          .join("")}
+        <input type="submit" value="Submit Selected" id="submit-selected">
+    </form>
+  `;
 
   // Add event listener for header form submission
   document
