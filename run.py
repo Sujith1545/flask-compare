@@ -18,17 +18,12 @@ def upload_file():
     file = request.files.get('file')
     if not file:
         return jsonify({'error': 'No file uploaded'}), 400
-
+    
     # Read the file into a DataFrame
-    try:
-        if file.filename.endswith('.xlsx'):
-            df = pd.read_excel(file)
-        elif file.filename.endswith('.csv'):
-            df = pd.read_csv(file)
-        else:
-            return jsonify({'error': 'Unsupported file format'}), 400
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+    if file.filename.endswith('.csv'):
+        df = pd.read_csv(file)
+    else:
+        df = pd.read_excel(file)
 
     uploaded_files['file1'] = df
 
@@ -44,17 +39,12 @@ def upload_second_file():
     file = request.files.get('file')
     if not file:
         return jsonify({'error': 'No file uploaded'}), 400
-
+    
     # Read the second file into a DataFrame
-    try:
-        if file.filename.endswith('.xlsx'):
-            df = pd.read_excel(file)
-        elif file.filename.endswith('.csv'):
-            df = pd.read_csv(file)
-        else:
-            return jsonify({'error': 'Unsupported file format'}), 400
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+    if file.filename.endswith('.csv'):
+        df = pd.read_csv(file)
+    else:
+        df = pd.read_excel(file)
 
     uploaded_files['file2'] = df
 
@@ -64,28 +54,26 @@ def upload_second_file():
 def process_files():
     if 'file1' not in uploaded_files or 'file2' not in uploaded_files:
         return jsonify({'error': 'Both files must be uploaded'}), 400
-
+    
     data = request.json
     selected_headers = data.get('headers')
 
     if not selected_headers:
         return jsonify({'error': 'No headers selected'}), 400
 
+    # Ensure selected_headers is a list
+    if isinstance(selected_headers, set):
+        selected_headers = list(selected_headers)
+
     # Process the files based on selected headers
     df1 = uploaded_files['file1']
     df2 = uploaded_files['file2']
-
+    
     try:
-        # Ensure the selected headers are present in both DataFrames
-        df1 = df1[set(selected_headers)]
-        df2 = df2[set(selected_headers)]
-
         # Example processing: merging two DataFrames on selected headers
-        result_df = df1.merge(df2, how='inner', on=selected_headers)
+        result_df = df1[list(selected_headers)].merge(df2[list(selected_headers)], how='inner')
     except KeyError as e:
-        return jsonify({'error': f"KeyError: {str(e)}"}), 400
-    except Exception as e:
-        return jsonify({'error': str(e)}), 400
+        return jsonify({'error': f'KeyError: {str(e)}'}), 400
 
     # Convert the result DataFrame to a byte stream
     result_stream = io.BytesIO()
