@@ -72,8 +72,8 @@ def process_files():
 
 
     try:
-        error = compare_headers(df2, selected_headers)
-        if error:
+        error = compare_headers(df1, df2, selected_headers)
+        if len(error) > 0:
              return jsonify({'error': f'2: {str(error)}'}), 400
     except ValueError as e:
         return jsonify({'error': f'3: {str(e)}'}), 400

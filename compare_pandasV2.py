@@ -69,13 +69,22 @@ pd.options.mode.chained_assignment = None
 #     df = pd.read_excel(f, engine='openpyxl')
 #     return df
 
-def compare_headers(df2, selected_headers):
+def compare_headers(df1, df2, selected_headers):
     # Find headers selected in file 1 that are missing in file 2
-    missing_headers = [header for header in selected_headers if header not in df2.columns]
+    # missing_headers = [header for header in selected_headers if header not in df2.columns]
 
-    if missing_headers:
-        return f"Missing headers in File 2: {', '.join(missing_headers)}"
-    return None
+        # Validate selected headers against DataFrame columns
+    missing_in_df1 = [header for header in selected_headers if header not in df1.columns]
+    missing_in_df2 = [header for header in selected_headers if header not in df2.columns]
+
+    error_str = ''
+    if missing_in_df1:
+        error_str += f'Missing headers in File 1: {", ".join(missing_in_df1)}'
+
+    if missing_in_df2:
+        error_str += f'Missing headers in File 2: {", ".join(missing_in_df2)}'
+
+    return error_str
 
 """
     df1 : Dataframe
