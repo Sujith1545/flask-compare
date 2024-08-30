@@ -89,7 +89,11 @@ function updateHeaderSelection() {
             return response.blob();
           } else {
             return response.json().then((data) => {
-              throw new Error(data.error);
+              if (data.error) {
+                throw new Error(data.error);
+              } else {
+                throw new Error(data.success);
+              }
             });
           }
         })

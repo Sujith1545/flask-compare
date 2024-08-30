@@ -100,7 +100,7 @@ def process_files():
     try:
         result_df = pandas_compare(df1, df2, selected_headers)
         if result_df is None:
-            return jsonify({'error': f'No Match found 1'}), 400
+            return jsonify({'success': f'All matched'}), 400
     except KeyError as e:
         return jsonify({'error': f'KeyError 2: {str(e)}'}), 400
 
