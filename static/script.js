@@ -30,15 +30,14 @@ uploadForm1.addEventListener("submit", function (e) {
       if (data.headers) {
         headers = data.headers;
         file1Uploaded = true;
-        document
-          .getElementById("upload-file-1")
-          .classList.add("uploaded-button");
-        document.getElementById("upload-file-1").value = "File 1 Uploaded";
+        const uploadButton1 = document.getElementById("upload-file-1");
+        uploadButton1.classList.add("uploaded-button");
+        uploadButton1.value = "File 1 Uploaded";
+        uploadButton1.disabled = true; // Disable the button
 
-        // Show header selection section after file 1 upload
+        // Show header selection immediately after File 1 upload
         updateHeaderSelection();
 
-        // If file 2 is already uploaded, show header selection section
         if (file2Uploaded) {
           updateHeaderSelection();
         }
@@ -60,11 +59,12 @@ uploadForm2.addEventListener("submit", function (e) {
     .then((data) => {
       if (data.message) {
         file2Uploaded = true;
-        document
-          .getElementById("upload-file-2")
-          .classList.add("uploaded-button");
-        document.getElementById("upload-file-2").value = "File 2 Uploaded";
-        // Show header selection section if file 1 is already uploaded
+        const uploadButton2 = document.getElementById("upload-file-2");
+        uploadButton2.classList.add("uploaded-button");
+        uploadButton2.value = "File 2 Uploaded";
+        uploadButton2.disabled = true; // Disable the button
+
+        // Only update headers after both files are uploaded
         if (file1Uploaded) {
           updateHeaderSelection();
         }
@@ -77,26 +77,27 @@ uploadForm2.addEventListener("submit", function (e) {
 
 function updateHeaderSelection() {
   headerSelectionContainer.innerHTML = `
-    <h2>Select Headers for Processing</h2>
-    <div id="select-all-container">
-        <input type="checkbox" id="select-all" /> <label for="select-all"><strong>Select All</strong></label>
-    </div>
-    <form id="header-form">
-        ${headers
-          .map(
-            (header) => `
-            <div>
-                <input type="checkbox" name="headers" value="${header}" ${
-              selectedHeaders.includes(header) ? "checked" : ""
-            }> 
-                ${header}
-            </div>
-        `
-          )
-          .join("")}
-        <input type="submit" value="Submit Selected" id="submit-selected">
-    </form>
-  `;
+        <h2>Select Headers for Processing</h2>
+        <div id="select-all-container">
+            <input type="checkbox" id="select-all" /> <label for="select-all"><strong>Select All</strong></label>
+        </div>
+        <form id="header-form">
+            ${headers
+              .map(
+                (header, index) => `
+                <div>
+                    <input type="checkbox" id="header-${index}" name="headers" value="${header}" ${
+                  selectedHeaders.includes(header) ? "checked" : ""
+                }> 
+                    <label for="header-${index}">${header}</label>
+                </div>
+            `
+              )
+              .join("")}
+            <input type="submit" value="Submit Selected" id="submit-selected">
+            <button type="button" id="reset-button">Reset</button>
+        </form>
+    `;
 
   // Add event listener for header form submission
   document
@@ -161,6 +162,36 @@ function updateHeaderSelection() {
       checkbox.checked = isChecked;
     });
   });
+
+  // Add event listener for "Reset" button
+  document
+    .getElementById("reset-button")
+    .addEventListener("click", function () {
+      // Reset state
+      headers = [];
+      selectedHeaders = [];
+      file1Uploaded = false;
+      file2Uploaded = false;
+
+      // Clear forms
+      uploadForm1.reset();
+      uploadForm2.reset();
+
+      // Reset button states
+      const uploadButton1 = document.getElementById("upload-file-1");
+      const uploadButton2 = document.getElementById("upload-file-2");
+      uploadButton1.classList.remove("uploaded-button");
+      uploadButton1.value = "Upload File 1";
+      uploadButton1.disabled = false;
+
+      uploadButton2.classList.remove("uploaded-button");
+      uploadButton2.value = "Upload File 2";
+      uploadButton2.disabled = false;
+
+      // Clear header selection
+      headerSelectionContainer.innerHTML = "";
+      headerSelectionContainer.style.display = "none";
+    });
 
   headerSelectionContainer.style.display = "block";
 }

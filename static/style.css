@@ -82,3 +82,28 @@ button:hover {
   border: none;
   cursor: not-allowed; /* Optional: Change cursor to indicate the button is disabled */
 }
+
+/* Style for disabled button */
+.uploaded-button:disabled {
+  background-color: #9e9e9e; /* Gray */
+  color: #ccc; /* Light gray text */
+  cursor: not-allowed; /* Change cursor to indicate the button is disabled */
+}
+/* Style for reset button */
+#reset-button {
+  background-color: #f44336; /* Red background */
+  color: white; /* White text */
+  border: none;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+#reset-button:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+}
