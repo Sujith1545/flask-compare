@@ -107,7 +107,7 @@ function updateHeaderSelection() {
           URL.revokeObjectURL(url);
         })
         .catch((error) => {
-          alert("Error: " + error.message);
+          alert("Error 1: " + error);
         });
     });
 }
@@ -135,7 +135,7 @@ uploadForm1.addEventListener("submit", function (e) {
           updateHeaderSelection(); // Show header selection if file 2 is uploaded
         }
       } else {
-        alert(data.error);
+        alert("Error 3: ", data.error);
       }
     })
     .catch((error) => {
@@ -166,7 +166,7 @@ uploadForm2.addEventListener("submit", function (e) {
           updateHeaderSelection(); // Show header selection if file 1 is uploaded
         }
       } else {
-        alert(data.error);
+        alert("Error 4: ", data.error);
       }
     })
     .catch((error) => {
@@ -186,7 +186,7 @@ compareHeadersBtn.addEventListener("click", function () {
     .then((response) => response.json())
     .then((data) => {
       if (data.error) {
-        alert("Error: " + data.error);
+        alert("Error 2: " + data);
       } else {
         headerSelectionContainer.style.display = "block"; // Show header selection
         compareHeadersBtn.disabled = true; // Disable button after comparison
