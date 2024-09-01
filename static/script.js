@@ -30,6 +30,21 @@ function updateCompareButtonState() {
   );
 }
 
+// function getSelectedOption() {
+//   // Get the select element by its ID
+//   var selectElement = document.getElementById("myDropdown");
+
+//   // Get the selected option's value
+//   var selectedValue = selectElement.value;
+
+//   // Get the selected option's text
+//   var selectedText = selectElement.options[selectElement.selectedIndex].text;
+
+//   // Display the selected option value and text
+//   document.getElementById("selectedOption").innerText =
+//     "Selected value: " + selectedValue + ", Selected text: " + selectedText;
+// }
+
 function updateHeaderSelection() {
   headerSelectionContainer.innerHTML = `
     <h2>Select Headers for Processing</h2>
@@ -75,13 +90,18 @@ function updateHeaderSelection() {
 
       selectedHeaders = checkedHeaders;
 
+      var selectElement = document.getElementById("myDropdown");
+
+      // Get the selected option's value
+      var selectedMethod = selectElement.value;
+
       showLoader("loader"); // Show global loader
       fetch("/process", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ headers: selectedHeaders }),
+        body: JSON.stringify({ headers: selectedHeaders, selectedMethod }),
       })
         .then((response) => {
           hideLoader("loader"); // Hide global loader
@@ -186,7 +206,7 @@ compareHeadersBtn.addEventListener("click", function () {
     .then((response) => response.json())
     .then((data) => {
       if (data.error) {
-        alert("Error 2: " + data);
+        alert("Error 2: " + data.error);
       } else {
         headerSelectionContainer.style.display = "block"; // Show header selection
         compareHeadersBtn.disabled = true; // Disable button after comparison

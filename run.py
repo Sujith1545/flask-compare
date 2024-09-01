@@ -75,6 +75,8 @@ def process_files():
     
     data = request.json
     selected_headers = data.get('headers')
+    selected_method = data.get('selectedMethod')
+    print('selected_method: ', selected_method)
 
     if not selected_headers:
         return jsonify({'error': 'No headers selected'}), 400

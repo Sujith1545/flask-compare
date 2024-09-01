@@ -172,7 +172,7 @@ def pandas_compare(df1, df2, primary_key, is_tolerance=False):
         column_length = len(delta_mismatch.columns)
         if len(delta_mismatch) > 0:
             print("Highlighting started for mismatches")
-            add_background_colors(file_path_df_result, column_length)
+            add_background_colors(result_stream, column_length)
         
         result_stream.seek(0) 
         return result_stream 
