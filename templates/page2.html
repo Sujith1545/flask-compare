@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page 2</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <script src="{{ url_for('static', filename='page2.js') }}" defer></script>
+
+    <style>
+      /* General form styles */
+      form {
+        max-width: 500px; /* Set a maximum width for the form */
+
+        padding: 20px; /* Add padding around the form */
+        border: 1px solid #ddd; /* Add a border around the form */
+        border-radius: 8px; /* Round the corners of the border */
+        background-color: #f9f9f9; /* Light grey background color */
+      }
+
+      label {
+        display: block; /* Display labels as block elements */
+        margin-bottom: 8px; /* Space below labels */
+        font-weight: bold; /* Make labels bold */
+      }
+
+      input[type="text"] {
+        width: calc(100% - 20px); /* Full width minus padding */
+        padding: 8px; /* Padding inside text input */
+        margin-bottom: 16px; /* Space below text inputs */
+        border: 1px solid #ccc; /* Light border for text input */
+        border-radius: 4px; /* Round corners of text input */
+      }
+
+      input[type="submit"] {
+        background-color: #3498db; /* Blue background color */
+        color: white; /* White text color */
+        padding: 10px 20px; /* Padding around the button text */
+        border: none; /* Remove default border */
+        border-radius: 4px; /* Round corners of the button */
+        cursor: pointer; /* Change cursor to pointer on hover */
+        font-size: 16px; /* Increase font size */
+      }
+
+      input[type="submit"]:hover {
+        background-color: #2980b9; /* Darker blue on hover */
+      }
+
+      /* Loader styles */
+      .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #3498db; /* Blue */
+        border-radius: 50%;
+        width: 120px;
+        height: 120px;
+        animation: spin 2s linear infinite;
+        margin: 20px auto; /* Center the loader */
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Welcome to Page 2</h1>
+
+    <!-- Content of Page 2 -->
+    <p>This is the content of the second page.</p>
+
+    <!-- Text input form -->
+    <form id="text-input-form">
+      <label for="input1">Input 1:</label>
+      <input type="text" id="input1" name="input1" />
+      <br />
+      <label for="input2">Input 2:</label>
+      <input type="text" id="input2" name="input2" />
+      <br />
+      <input type="submit" value="Submit" />
+    </form>
+
+    <!-- Feedback and loader -->
+    <div id="feedback" style="margin-top: 20px"></div>
+    <div id="loader" class="loader" style="display: none"></div>
+
+    <!-- Link back to the original page -->
+    <a href="{{ url_for('index') }}">Back</a>
+  </body>
+</html>

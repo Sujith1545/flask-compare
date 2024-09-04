@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_file, render_template
 import pandas as pd
-import io
 from compare_pandasV2 import pandas_compare, compare_headers
+from page2 import process_page2
 
 app = Flask(__name__)
 
@@ -12,6 +12,16 @@ headers = []
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/page2')
+def page2():
+    return render_template('page2.html')
+
+@app.route('/submit_page2', methods=['POST'])
+def submit_text():
+    message, status_code = process_page2(request)
+    return jsonify({'message': message}), status_code
+
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -114,6 +124,7 @@ def process_files():
         download_name='result.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
 
 if __name__ == '__main__':
     app.run(debug=True)
