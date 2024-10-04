@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_file, render_template
 import pandas as pd
 from compare_pandasV2 import pandas_compare, compare_headers
 from page2 import process_page2
+from calculate.calculate_xlsx import run
 
 app = Flask(__name__)
 
@@ -124,6 +125,15 @@ def process_files():
         download_name='result.xlsx',
         mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
+
+@app.route('/calculate', methods=['POST'])
+def calculate_xlsx():
+
+    raw_file_path = 'calculate/raw.xlsx'    
+    df = pd.read_excel(raw_file_path, sheet_name='Sheet1')
+    r = run(df)
+    return r
 
 
 if __name__ == '__main__':
