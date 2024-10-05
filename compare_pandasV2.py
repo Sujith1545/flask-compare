@@ -102,6 +102,13 @@ def compare_headers(df1, df2):
     is_tolerance : False default for no need to check tolerance limit.
                     True enabled means it will consider for tolerance 
 """
+
+def is_mismatch_found(miss_match_df):
+    isFound = len(miss_match_df[miss_match_df['_merge'] == 'both']) == 0 and \
+        (len(miss_match_df[miss_match_df['_merge'] == 'left_only']) > 0 or \
+         len(miss_match_df[miss_match_df['_merge'] == 'right_only']) > 0)
+    return isFound
+
 def pandas_compare(df1, df2, primary_key, is_tolerance=False):
     print('primary_key:: ', primary_key)
     """Function will compare two dataframes even if rows count are not matching and stores the original two files,
@@ -114,6 +121,8 @@ def pandas_compare(df1, df2, primary_key, is_tolerance=False):
 
     # Merge TWO DF - if all values match - both , if miss match  left  df1 and right  df2 will show
     df_mismatch = pd.merge(df1, df2, how='outer', indicator=True)
+    common_matched = pd.merge(df1, df2, how='inner', indicator=True)
+    common_matched = common_matched.drop(['_merge'], axis=1)
 
     # print('df_mismatch: ', df_mismatch)
     # in below two condition ignoring both value and getting additional data for comparing
@@ -127,6 +136,7 @@ def pandas_compare(df1, df2, primary_key, is_tolerance=False):
 
     miss_match_df = pd.merge(df_mismatch1, df_mismatch2, how='outer', on=primary_key, indicator=True)
 
+
     if len(miss_match_df[miss_match_df['_merge'] == 'both']) == 0 and (len(miss_match_df[miss_match_df['_merge']
                                                                                          == 'left_only']) > 0 or len(
         miss_match_df[miss_match_df['_merge'] == 'right_only']) > 0):
@@ -135,9 +145,7 @@ def pandas_compare(df1, df2, primary_key, is_tolerance=False):
         delta_mismatch = pd.DataFrame()
     # Filtering the mismatch values and additional values in different dataframes
     else:
-
         filter_unique_key = "|".join(primary_key)
-
         # Filtering out the mismatch values(not additional) in both dataframes
         df_mismatch1, df_mismatch2 = parse_data_df_using_regex(miss_match_df, filter_unique_key, method_type='both')
         
@@ -146,7 +154,6 @@ def pandas_compare(df1, df2, primary_key, is_tolerance=False):
 
         print('--df_mismatch1--: ',  df_mismatch1)
         print('--df_mismatch2--: ',  df_mismatch2)
-
 
         # concatenating mismatch data from first dataframe row wise
         delta_mismatch = pd.concat([df_mismatch1, df_mismatch2]).sort_index(kind='merge')
@@ -164,6 +171,7 @@ def pandas_compare(df1, df2, primary_key, is_tolerance=False):
                 add_df1.to_excel(writer, sheet_name='Actual_Additional', index=False)
                 add_df2.to_excel(writer, sheet_name='Expected_Additional', index=False)
                 delta_mismatch.to_excel(writer, sheet_name='Mismatch', index=False) 
+                common_matched.to_excel(writer, sheet_name='Common_Matched', index=False) 
              
         except Exception as e:
             print("Not able to create file11 {}")

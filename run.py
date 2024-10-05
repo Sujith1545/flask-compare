@@ -135,6 +135,24 @@ def calculate_xlsx():
     r = run(df)
     return r
 
+@app.route('/common', methods=['POST'])
+def get_common():
+    first_path = 'data/first.xlsx'
+    second_path = 'data/second.xlsx'    
+    df1 = pd.read_excel(first_path, sheet_name='Sheet1')
+    df2 = pd.read_excel(second_path, sheet_name='Sheet1')
+    r = pandas_compare(df1, df2, ['A', 'B'])
+    if r:
+        return send_file(
+            r,
+            as_attachment=True,
+            download_name='result.xlsx',
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+    else:
+        return jsonify({'error': 'All mathched'})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
