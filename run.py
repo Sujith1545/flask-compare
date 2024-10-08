@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, send_file, render_template
 import pandas as pd
 from compare_pandasV2 import pandas_compare, compare_headers
-from page2 import process_page2
+from page2 import process_page2, download_result_file
 from calculate.calculate_xlsx import run
 
 app = Flask(__name__)
@@ -153,6 +153,10 @@ def get_common():
         return jsonify({'error': 'All mathched'})
 
 
+@app.route('/donload_page2_file', methods=['GET'])
+def donload_page2_file():
+    r = download_result_file()
+    return r
 
 if __name__ == '__main__':
     app.run(debug=True)
