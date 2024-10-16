@@ -8,6 +8,7 @@ app = Flask(__name__)
 
 # In-memory storage for files
 uploaded_files = {}
+uploaded_files_page2 = {}
 headers = []
 
 @app.route('/')
@@ -157,6 +158,25 @@ def get_common():
 def donload_page2_file():
     r = download_result_file()
     return r
+
+
+@app.route('/upload_get_data_file', methods=['POST'])
+def upload_get_data_file():
+    return jsonify({'message': 'Page 2 uploaded file successfully'})
+    global uploaded_files_page2
+    file = request.files.get('file')
+    if not file:
+        return jsonify({'error': 'No file uploaded'}), 400
+    
+    # Read the second file into a DataFrame
+    if file.filename.endswith('.csv'):
+        df = pd.read_csv(file)
+    else:
+        df = pd.read_excel(file)
+
+    print('page 2 file: ', df)
+    return jsonify({'message': 'Page 2 uploaded file successfully'})
+
 
 if __name__ == '__main__':
     app.run(debug=True)
