@@ -3,6 +3,7 @@ import pandas as pd
 from compare_pandasV2 import pandas_compare, compare_headers
 from page2 import process_page2, download_result_file
 from calculate.calculate_xlsx import run
+import time
 
 app = Flask(__name__)
 
@@ -162,6 +163,7 @@ def donload_page2_file():
 
 @app.route('/upload_get_data_file', methods=['POST'])
 def upload_get_data_file():
+    time.sleep(5)
     return jsonify({'message': 'Page 2 uploaded file successfully'})
     global uploaded_files_page2
     file = request.files.get('file')
@@ -177,6 +179,13 @@ def upload_get_data_file():
     print('page 2 file: ', df)
     return jsonify({'message': 'Page 2 uploaded file successfully'})
 
+
+
+@app.route('/compare_file')
+def compare_file():
+    time.sleep(5)
+    return jsonify({'message': 'on_compare file successfully'})
+   
 
 if __name__ == '__main__':
     app.run(debug=True)

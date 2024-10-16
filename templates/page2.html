@@ -154,6 +154,7 @@
         />
 
         <!-- Compare button with loader inside -->
+        <input type="submit" class="submit-btn" value="Upload File" />
         <div class="button-row loader-container">
           <input
             type="button"
@@ -163,62 +164,8 @@
           />
           <div id="compare-loader" class="loader hidden"></div>
         </div>
-
-        <input type="submit" class="submit-btn" value="Submit" />
       </div>
     </form>
-
-    <script>
-      // Get the form and file input elements
-      const uploadFileForm = document.getElementById("upload-file-form");
-      const fileUploadInput = document.getElementById("upload-btn-id");
-      const feedback = document.getElementById("feedback"); // Assuming you have a feedback div
-      const loader = document.getElementById("loader"); // Assuming you have a loader div
-
-      // Submit event handler for the file upload form
-      uploadFileForm.addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent the default form submission
-
-        const file = fileUploadInput.files[0]; // Get the selected file from the file input
-        if (!file) {
-          feedback.textContent = "No file selected."; // Handle the case where no file was chosen
-          return;
-        }
-
-        // Show loader
-        showLoader("loader");
-
-        // Create a new FormData object from the form
-        const formData = new FormData(uploadFileForm); // This will include the file
-
-        // Upload the file using fetch
-        fetch("/upload_get_data_file", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            feedback.textContent = "File uploaded successfully!";
-          })
-          .catch((error) => {
-            console.log("error: ", error);
-            feedback.textContent = "An error occurred: " + error.message;
-          })
-          .finally(() => {
-            hideLoader("loader"); // Hide the loader after the request is done
-          });
-      });
-
-      // Function to show the loader
-      function showLoader(targetId) {
-        document.getElementById(targetId).style.display = "block";
-      }
-
-      // Function to hide the loader
-      function hideLoader(targetId) {
-        document.getElementById(targetId).style.display = "none";
-      }
-    </script>
 
     <!-- Feedback and loader -->
     <div id="feedback"></div>

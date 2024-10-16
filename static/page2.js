@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", function () {
   const uploadFileForm = document.getElementById("upload-file-form");
   const fileUploadInput = document.getElementById("upload-btn-id");
 
-  // const compareBtn = document.getElementById("compare-btn-id");
+  const compareBtn = document.getElementById("compare-btn-id");
   // const compareLoader = document.getElementById("compare-loader");
 
   form.addEventListener("submit", function (event) {
@@ -71,85 +71,55 @@ document.addEventListener("DOMContentLoaded", function () {
       });
   });
 
-  // uploadFileForm.addEventListener("submit", function (event) {
-  //   event.preventDefault(); //
+  uploadFileForm.addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent the default form submission
 
-  //   const file = event.target.files[0];
-  //   if (!file) {
-  //     feedback.textContent = "No file selected.";
-  //     return;
-  //   }
+    const file = fileUploadInput.files[0]; // Get the selected file from the file input
+    if (!file) {
+      feedback.textContent = "No file selected."; // Handle the case where no file was chosen
+      return;
+    }
 
-  //   hideLoader("loader");
+    // Show loader
+    showLoader("loader");
 
-  //   const formData = new FormData(file);
-  //   fetch("/upload_get_data_file", {
-  //     method: "POST",
-  //     body: formData,
-  //   })
-  //     .then((response) => response.json())
-  //     .then((data) => {
-  //       feedback.textContent = "File uploaded successfully!"; // Show success message
-  //     })
-  //     .catch((error) => {
-  //       feedback.textContent = "An error occurred: " + error.message;
-  //     })
-  //     .finally((e) => {
-  //       hideLoader("loader");
-  //     });
-  // });
+    // Create a new FormData object from the form
+    const formData = new FormData(uploadFileForm); // This will include the file
 
-  // Handle file upload action
-  // fileUploadInput.addEventListener("change", function (event) {
-  //   const file = fileUploadInput.files[0]; // Get the selected file
-  //   if (!file) {
-  //     feedback.textContent = "No file selected.";
-  //     return;
-  //   }
+    // Upload the file using fetch
+    fetch("/upload_get_data_file", {
+      method: "POST",
+      body: formData,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        feedback.textContent = "File uploaded successfully!";
+      })
+      .catch((error) => {
+        console.log("error: ", error);
+        feedback.textContent = "An error occurred: " + error.message;
+      })
+      .finally(() => {
+        hideLoader("loader"); // Hide the loader after the request is done
+      });
+  });
 
-  //   // Show loader
-  //   hideLoader("loader");
-
-  //   // // replace this with api call
-  //   // let progress = 0; // Start the progress at 0%
-  //   // const interval = setInterval(() => {
-  //   //   progress += 10; // Increment the progress by 10%
-  //   //   if (progress >= 100) {
-  //   //     clearInterval(interval); // Stop the interval once we reach 100%
-  //   //     hideLoader("loader"); // Hide loader when upload is complete
-  //   //     feedback.textContent = "File uploaded successfully!"; // Show success message
-  //   //   } else {
-  //   //     feedback.textContent = `Uploading... ${progress}%`; // Show progress
-  //   //   }
-  //   // }, 500); // Update the progress every 500ms (simulate upload delay)
-
-  //   // const formData = new FormData(file);
-  //   // fetch("/upload_get_data_file", {
-  //   //   method: "POST",
-  //   //   body: formData,
-  //   // })
-  //   //   .then((response) => response.json())
-  //   //   .then((data) => {
-  //   //     feedback.textContent = "File uploaded successfully!"; // Show success message
-  //   //   })
-  //   //   .catch((error) => {
-  //   //     feedback.textContent = "An error occurred: " + error.message;
-  //   //   })
-  //   //   .finally((e) => {
-  //   //     hideLoader("loader");
-  //   //   });
-  // });
-
-  // compareBtn.addEventListener("click", function (event) {
-  //   compareLoader.classList.remove("hidden");
-
-  //   // Simulate processing (replace with actual logic)
-  //   setTimeout(function () {
-  //     // After 3 seconds, hide the loader and show feedback
-  //     compareLoader.classList.add("hidden");
-  //     document.getElementById("feedback").innerText = "Comparison Complete!";
-  //   }, 3000); // Simulate a 3-second operation
-  // });
+  compareBtn.addEventListener("click", function () {
+    console.log("on comapte click");
+    showLoader("compare-loader");
+    fetch("/compare_file")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("data: ", data);
+      })
+      .catch((error) => {
+        console.log("error: ", error);
+        feedback.textContent = "An error occurred: " + error.message;
+      })
+      .finally(() => {
+        hideLoader("compare-loader");
+      });
+  });
 });
 
 function showLoader(targetId) {
